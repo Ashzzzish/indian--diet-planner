@@ -64,7 +64,23 @@ function Dashboard() {
     );
   }
 
-  const { targets } = diet;
+  if (diet.error) {
+  return (
+    <div className="min-h-screen bg-cream flex items-center justify-center px-4">
+      <div className="text-center max-w-md">
+        <p className="font-body text-red-600 mb-4">{diet.error}</p>
+        <button
+          onClick={() => navigate("/edit-profile")}
+          className="bg-forest text-cream px-6 py-2.5 rounded-lg font-body font-medium"
+        >
+          Edit my profile
+        </button>
+      </div>
+    </div>
+  );
+}
+
+const { targets } = diet;
 
   const macroData = [
     { name: "Protein", value: targets.protein_g },
