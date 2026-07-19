@@ -17,9 +17,14 @@ Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="Indian Diet Planner API")
 
+app = FastAPI(title="Indian Diet Planner API")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[
+        "http://localhost:5173",
+        "https://indian-diet-planner.vercel.app",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -235,3 +240,4 @@ def create_diet_plan(req: DietPlanRequest, db: Session = Depends(get_db),
 
     result["notes"] = notes
     return result
+    
