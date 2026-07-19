@@ -23,7 +23,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:5173",
-        "https://indian-diet-planner.vercel.app",
+        "https://indian-diet-planner-eight.vercel.app",
     ],
     allow_credentials=True,
     allow_methods=["*"],
