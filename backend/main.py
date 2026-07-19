@@ -1,4 +1,5 @@
 import json
+import csv
 from fastapi import FastAPI, Depends, HTTPException
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from fastapi.middleware.cors import CORSMiddleware
@@ -14,8 +15,6 @@ from genetic_adjustments import get_genetic_adjustments
 
 # Ensure tables exist (safe to call even if they already do)
 Base.metadata.create_all(bind=engine)
-
-app = FastAPI(title="Indian Diet Planner API")
 
 app = FastAPI(title="Indian Diet Planner API")
 
@@ -71,6 +70,38 @@ def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(securit
 @app.get("/")
 def root():
     return {"message": "Indian Diet Planner API is running"}
+    # ---------- ONE-TIME ADMIN: LOAD FOODS ----------
+@app.get("/admin/load-foods")
+def load_foods_endpoint(db: Session = Depends(get_db)):
+    existing_count = db.query(models.Food).count()
+    if existing_count > 0:
+        return {"message": f"Foods table already has {existing_count} rows. Skipping to avoid duplicates."}
+
+    csv_path = "../data/indian_foods.csv"
+    count = 0
+    with open(csv_path, newline="", encoding="utf-8") as csvfile:
+        reader = csv.DictReader(csvfile)
+        for row in reader:
+            food = models.Food(
+                name=row["name"],
+                region=row["region"],
+                diet_type=row["diet_type"],
+                meal_type=row["meal_type"],
+                calories=float(row["calories"]),
+                protein_g=float(row["protein_g"]),
+                carbs_g=float(row["carbs_g"]),
+                fat_g=float(row["fat_g"]),
+                glycemic_load=row["glycemic_load"],
+                saturated_fat_level=row["saturated_fat_level"],
+                is_dairy_heavy=(row["is_dairy_heavy"].strip().lower() == "true"),
+                is_folate_rich=(row["is_folate_rich"].strip().lower() == "true"),
+            )
+            db.add(food)
+            count += 1
+        db.commit()
+
+    return {"message": f"Inserted {count} foods into the live database."}
+
 
 
 # ---------- SIGNUP ----------
